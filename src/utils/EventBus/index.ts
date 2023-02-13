@@ -5,16 +5,26 @@ export type Event<Type, Payload> = {
 
 export type Subscriber<AnyEvent> = (event: AnyEvent) => void;
 
-class EventBus<AnyEvent> {
-  private subscribers: Subscriber<AnyEvent>[] = [];
+export type EventBus<AnyEvent> = {
+  subscribe: (subscriber: Subscriber<AnyEvent>) => void;
+  publish: (event: AnyEvent) => void;
+};
 
-  subscribe(subscriber: Subscriber<AnyEvent>): void {
-    this.subscribers.push(subscriber);
-  }
+const createEventBus = <AnyEvent>(): EventBus<AnyEvent> => {
+  const subscribers: Subscriber<AnyEvent>[] = [];
 
-  publish(event: AnyEvent): void {
-    this.subscribers.forEach((subscriber) => subscriber(event));
-  }
-}
+  const subscribe = (subscriber: Subscriber<AnyEvent>) => {
+    subscribers.push(subscriber);
+  };
 
-export default EventBus;
+  const publish = (event: AnyEvent) => {
+    subscribers.forEach((subscriber) => subscriber(event));
+  };
+
+  return {
+    subscribe,
+    publish,
+  };
+};
+
+export default createEventBus;

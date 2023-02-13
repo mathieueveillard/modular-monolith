@@ -1,6 +1,6 @@
 import { AnyDomainEvent } from "../events";
 import { ProductId } from "../Storage/domain";
-import EventBus from "../utils/EventBus";
+import { EventBus } from "../utils/EventBus";
 import { Product } from "./domain";
 
 const CATALOG: Record<ProductId, Product> = {
@@ -17,14 +17,18 @@ type Dependencies = {
   eventBus: EventBus<AnyDomainEvent>;
 };
 
-const bootstrapSalesContext = ({ eventBus }: Dependencies) => ({
-  sell: (productId: ProductId) => {
+const bootstrapSalesApi = ({ eventBus }: Dependencies) => {
+  const sell = (productId: ProductId): void => {
     // Do something
     eventBus.publish({
       type: "SALES_CLOSED",
       payload: CATALOG[productId],
     });
-  },
-});
+  };
 
-export default bootstrapSalesContext;
+  return {
+    sell,
+  };
+};
+
+export default bootstrapSalesApi;

@@ -1,9 +1,9 @@
-import EventBus, { Event } from ".";
+import createEventBus, { Event } from ".";
 
 describe("Test of EventBus", () => {
   test("One single subscriber", () => {
     // GIVEN
-    const bus = new EventBus();
+    const bus = createEventBus();
     const subscriber = jest.fn();
     bus.subscribe(subscriber);
 
@@ -20,7 +20,7 @@ describe("Test of EventBus", () => {
 
   test("Many subscribers", () => {
     // GIVEN
-    const bus = new EventBus();
+    const bus = createEventBus();
 
     const subscriber1 = jest.fn();
     bus.subscribe(subscriber1);

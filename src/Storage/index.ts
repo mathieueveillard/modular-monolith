@@ -1,12 +1,18 @@
 import { AnyDomainEvent } from "../events";
-import EventBus from "../utils/EventBus";
-import { DANGEROUSLY_LOW_STOCK_LEVEL, decrementStock, incrementStock, ProductId, Stock } from "./domain";
+import { EventBus } from "../utils/EventBus";
+import {
+  DANGEROUSLY_LOW_STOCK_LEVEL,
+  incrementStock as incrementStockFromDomain,
+  decrementStock as decrementStockFromDomain,
+  ProductId,
+  Stock,
+} from "./domain";
 
 type Dependencies = {
   eventBus: EventBus<AnyDomainEvent>;
 };
 
-const bootstrapStorageContext = ({ eventBus }: Dependencies) => {
+const bootstrapStorageApi = ({ eventBus }: Dependencies) => {
   let stock: Stock = {
     "a9a05737-0a30-424c-b3bf-b4445cddd418": 0,
   };
@@ -15,7 +21,7 @@ const bootstrapStorageContext = ({ eventBus }: Dependencies) => {
     if (event.type === "SALES_CLOSED") {
       const productId = event.payload.id;
 
-      stock = decrementStock(productId)(1)(stock);
+      stock = decrementStockFromDomain(productId)(1)(stock);
 
       if (stock[productId] < DANGEROUSLY_LOW_STOCK_LEVEL) {
         eventBus.publish({
@@ -29,17 +35,20 @@ const bootstrapStorageContext = ({ eventBus }: Dependencies) => {
     }
   });
 
-  return {
-    incrementStock:
-      (productId: ProductId) =>
-      (quantity: number): void => {
-        stock = incrementStock(productId)(quantity)(stock);
-      },
+  const incrementStock =
+    (productId: ProductId) =>
+    (quantity: number): void => {
+      stock = incrementStockFromDomain(productId)(quantity)(stock);
+    };
 
-    computeStock: (productId: ProductId): number => {
-      return stock[productId];
-    },
+  const computeStock = (productId: ProductId): number => {
+    return stock[productId];
+  };
+
+  return {
+    incrementStock,
+    computeStock,
   };
 };
 
-export default bootstrapStorageContext;
+export default bootstrapStorageApi;
